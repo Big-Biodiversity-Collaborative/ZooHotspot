@@ -2,11 +2,11 @@
 
 ## Summary
 
-The project uses community science observations of butterflies to compare 
-biodiversity in botanical gardens to that of surrounding urban areas in the 
+This project uses community science observations of butterflies to compare 
+biodiversity in zoological parks to that of surrounding urban areas in the 
 southwestern United States of America. It uses two measures, species richness 
 and Shannon's Index of diversity, along with bootstrapping replicates to 
-illustrate how relatively small botanical gardens serve as biodiversity 
+illustrate how relatively small zoological parks serve as biodiversity 
 hotspots for urban areas.
 
 ## Dependencies
