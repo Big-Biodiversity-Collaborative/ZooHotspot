@@ -1,4 +1,4 @@
-﻿name, lat_min, lat-max, lon_min, lon_max, city, state
+﻿name, lat_min, lat_max, lon_min, lon_max, city, state
 Reid Park Zoo,32.207268,32.210151,-110.922307,-110.918278, Tucson, AZ
 Phoenix Zoo,33.446736,33.452685,-111.952278,-111.940609, Phoenix, AZ
 San Diego Zoo,32.732532,32.739943,-117.155699,-117.14781, San Diego, CA
