@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 #' Download records from GBIF for a set of coordinates and list of taxa
 #' 
 #' @param taxon_keys numeric vector of taxon keys to search for
@@ -102,7 +102,7 @@ query_gbif <- function(taxon_keys, lon_limits, lat_limits, verbose = FALSE,
       dplyr::select(dplyr::intersect(cols, colnames(all_obs)))
   }
   return(all_obs)
-=======
+
 #' Download records from GBIF for a set of coordinates and list of taxa
 #' 
 #' @param taxon_keys numeric vector of taxon keys to search for
@@ -206,5 +206,4 @@ query_gbif <- function(taxon_keys, lon_limits, lat_limits, verbose = FALSE,
       dplyr::select(dplyr::intersect(cols, colnames(all_obs)))
   }
   return(all_obs)
->>>>>>> c15fe3cc3454d182954ed35835d0c8f17460a2bd
 }
