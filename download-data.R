@@ -24,7 +24,7 @@ source(file = "Functions/query_gbif.R")
 zoos <- read.csv(file = "data/zoos.csv")
 
 # Indicate whether or not to overwrite data files that already exist
-overwrite <- FALSE
+overwrite <- TRUE
 
 # Download data for each zoo, then for the corresponding cities
 taxon_keys <- c("Hesperiidae" = 6953,
@@ -69,7 +69,7 @@ for(city_state in city_state_string) {
   city_name <- tolower(x = gsub(pattern = ", ",
                                 replacement = "_",
                                 x = city_state))
-}
+
 
 city_name <- gsub(pattern = " ",
                   replacement = "_",
@@ -113,6 +113,8 @@ if (overwrite | !file.exists(city_file)) {
   write.csv(x = city_obs,
             file = city_file,
             row.names = FALSE)
-} else {
+  }
+else {
   message("Skipping download for ", city_state, ", already on disk.")
+}
 }
