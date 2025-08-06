@@ -34,7 +34,7 @@ city_poly <- osmdata::getbb(place_name = city_state,
                             format_out = "polygon")
 # Most queries return a list, and we just want first matrix element when a single polygon is returned, it is already a matrix
 
-if (class(city_poly[1] == "list")) {
+if (class(city_poly[1]) == "list") {
   city_poly <- city_poly[[1]]
 }
 
@@ -91,15 +91,15 @@ city_plot <- city_plot +
              size = 0.8,
              color = "#3da45c")
 
-# Add a triangle for each garden
-for (garden_i in 1:nrow(city_gardens)) {
-  lon <- (city_gardens$lon_min[garden_i] + city_gardens$lon_max[garden_i])/2
-  lat <- (city_gardens$lat_min[garden_i] + city_gardens$lat_max[garden_i])/2
-  garden_df <- data.frame(lon = lon,
+# Add a triangle for each zoo
+for (zoo_i in 1:nrow(city_zoos)) {
+  lon <- (city_zoos$lon_min[zoo_i] + city_zoos$lon_max[zoo_i])/2
+  lat <- (city_zoos$lat_min[zoo_i] + city_zoos$lat_max[zoo_i])/2
+  zoo_df <- data.frame(lon = lon,
                           lat = lat,
-                          garden = city_gardens$name[garden_i])
+                          zoo = city_zoos$name[zoo_i])
   city_plot <- city_plot +
-    geom_point(data = garden_df,
+    geom_point(data = zoo_df,
                mapping = aes(x = lon, y = lat),
                shape = 24, 
                fill = "#f7a3a1", # #FFFFFF
