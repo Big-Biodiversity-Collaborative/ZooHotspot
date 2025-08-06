@@ -24,7 +24,7 @@ source(file = "Functions/query_gbif.R")
 zoos <- read.csv(file = "data/zoos.csv")
 
 # Indicate whether or not to overwrite data files that already exist
-overwrite <- FALSE
+overwrite <- TRUE
 
 # Download data for each zoo, then for the corresponding cities
 taxon_keys <- c("Hesperiidae" = 6953,
