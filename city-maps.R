@@ -1,7 +1,8 @@
 # Plot cities and zoos
 # Logan Estell
 # lestell@arizona.edu
-# 2025-07-20
+#Derived from Jeff Oliver's Botanical Garden Hotspot code
+# 2025-08-06
 
 require(dplyr)  # data wrangling
 require(osmdata)  # city boundaries
@@ -34,8 +35,95 @@ city_poly <- osmdata::getbb(place_name = city_state,
 # Most queries return a list, and we just want first matrix element when a single polygon is returned, it is already a matrix
 
 if (class(city_poly[1] == "list")) {
-  city_poly <- city_poly[[1]]}
+  city_poly <- city_poly[[1]]
 }
 
 # Now get GBIF observations for the city
+city_fileslug <- tolower(x = gsub(pattern = ", ",
+                                  replacement = "_",
+                                  x = city_state))
+city_fileslug <- gsub(pattern = " ",
+                      replacement = "_",
+                      x = city_fileslug)
+city_obs <- read.csv(file = paste0("Data/GBIF/",
+                                   city_fileslug, "-obs.csv"))
+#add obs from gardens
+city_zoos <- zoos[zoos$city == city_name, ]
+for (zoo_i in 1:nrow(city_zoos)) {
+  zoo_name <- tolower(x = gsub(pattern = " ",
+                               replacement = "_",
+                               x = city_zoos$name[zoo_i]))
+  zoos_obs <- read.csv(file = paste0("Data/GBIF/",
+                                     zoo_name, "-obs.csv"))
+  city_obs <- city_obs %>%
+    dplyr::bind_rows(zoos_obs)
+}
 
+#Drop duplicates
+city_obs <- city_obs %>%
+  distinct()
+
+#Use ggplot polygons
+city_df <- data.frame(lon = city_poly[, 1],
+                      lat = city_poly[, 2])
+
+# Get dimensions of zoos, set plot boundaries
+lon_min <- min(c(city_poly[, 1], city_zoos$lon_min))
+lon_max <- max(c(city_poly[, 1], city_zoos$lon_max))
+lat_min <- min(c(city_poly[, 2], city_zoos$lat_min))
+lat_max <- max(c(city_poly[, 2], city_zoos$lat_max))
+
+city_plot <- ggplot(data = city_df, mapping = aes(x = lon, y = lat)) +
+  geom_polygon(fill = "white", color = "black") +
+  xlim(c(lon_min, lon_max)) + 
+  ylim(c(lat_min, lat_max)) + 
+  labs(title = city_state) + 
+  theme_void() +
+  theme(plot.title = element_text(hjust = 0.5, vjust = 1),
+        title = element_text(size = 6),
+        text = element_text(family = "ArialMT"))
+
+# Add observations to plot
+city_plot <- city_plot +
+  geom_point(data = city_obs, mapping = aes(x = decimalLongitude,
+                                            y = decimalLatitude),
+             shape = 3,
+             size = 0.8,
+             color = "#3da45c")
+
+# Add a triangle for each garden
+for (garden_i in 1:nrow(city_gardens)) {
+  lon <- (city_gardens$lon_min[garden_i] + city_gardens$lon_max[garden_i])/2
+  lat <- (city_gardens$lat_min[garden_i] + city_gardens$lat_max[garden_i])/2
+  garden_df <- data.frame(lon = lon,
+                          lat = lat,
+                          garden = city_gardens$name[garden_i])
+  city_plot <- city_plot +
+    geom_point(data = garden_df,
+               mapping = aes(x = lon, y = lat),
+               shape = 24, 
+               fill = "#f7a3a1", # #FFFFFF
+               color = "#000000",
+               size = 3,
+               stroke = 0.6)
+}
+city_plots[[city_name]] <- city_plot
+}
+
+multi_city <- ggpubr::ggarrange(city_plots[[1]], 
+                                city_plots[[2]], 
+                                city_plots[[3]], 
+                                city_plots[[4]],
+                                city_plots[[5]],
+                                ncol = 3, nrow = 2)
+multi_city
+ggsave(filename = "output/City-plot.pdf",
+       plot = multi_city,
+       width = 5,
+       height = 3.33,
+       units = "in")
+ggsave(filename = "output/City-plot.png",
+       plot = multi_city,
+       width = 5,
+       height = 3.33,
+       units = "in")
