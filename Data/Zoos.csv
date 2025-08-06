@@ -1,9 +1,10 @@
 name, lat_min, lat_max, lon_min, lon_max, city, state
 Reid Park Zoo,32.207268,32.210151,-110.922307,-110.918278,Tucson,AZ
 Phoenix Zoo,33.44652,33.45300,-111.95242,-111.94045,Phoenix,AZ
-San Diego Zoo,32.73235,32.73960,-117.15567,-117.14580,San Diego, CA
+San Diego Zoo,32.73235,32.73960,-117.15567,-117.14580,San Diego,CA
 Albuquerque Biological Park,35.076068,35.080346,-106.665873,-106.66051,Albuquerque,NM
 Los Angeles Zoo,34.14465,34.15203,-118.29535,-118.28353,Los Angeles,CA
 San Antonio Zoo,29.460581,29.466886,-98.479857,-98.467133,San Antonio,TX
+
 
 
