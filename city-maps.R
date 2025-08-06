@@ -14,7 +14,7 @@ require(extrafont) #to use Arial in figures
 # Add star for zoo location and plus symbols for records from GBIF
 # Label plots accordingly
 
-zoos <- read.csv(file = "data/Zoos.csv")
+zoos <- read.csv(file = "Data/Zoos.csv")
 
 cities <- unique(zoos$city)
 
@@ -113,8 +113,8 @@ city_plots[[city_name]] <- city_plot
 multi_city <- ggpubr::ggarrange(city_plots[[1]], 
                                 city_plots[[2]], 
                                 city_plots[[3]], 
-                                city_plots[[4]],
                                 city_plots[[5]],
+                                city_plots[[6]],
                                 ncol = 3, nrow = 2)
 multi_city
 ggsave(filename = "output/City-plot.pdf",
