@@ -23,12 +23,12 @@ drop_single <- FALSE
 perm_test_file <-  "output/perm-test-results.rds"
 
 #force permutation tests even if results exist on disk?
-force_perms <- FALSE
+force_perms <- TRUE
 
 if (force_perms | !file.exists(perm_test_file))  {
   #parameters for perm tests
   nreps <-  1000
-  min_obs <- 40
+  min_obs <- 35
   
   perm_tests <- list()
   for (zoo_i in 1:nrow(zoos)) {
@@ -295,10 +295,10 @@ sample_values <- sample_values %>%
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
                              replacement = "\nPheonix",
-                             x = zoo_print))
+                             x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Diego",
-                        replacement = "\nSan Diego",
-                        x = zoo_print))
+                          replacement = "\nSan Diego",
+                          x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Los Angeles",
                         replacement = "\nLos Angeles",
                         x = zoo_print))
@@ -339,11 +339,11 @@ zoo_values <- zoo_values  %>%
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
                           replacement = "\nPheonix",
-                          x = zoo_print))
-mutate(zoo_print = gsub(pattern = "San Diego",
+                          x = zoo_print)) %>%
+  mutate(zoo_print = gsub(pattern = "San Diego",
                         replacement = "\nSan Diego",
-                        x = zoo_print))
-mutate(zoo_print = gsub(pattern = "LA",
+                        x = zoo_print)) %>%
+  mutate(zoo_print = gsub(pattern = "LA",
                         replacement = "\nLA",
                         x = zoo_print))
   
@@ -433,4 +433,3 @@ zoo_values %>%
 # Pull out values for those permutation t-tests
 richness_t_list <- lapply(X = perm_tests, FUN = "[[", "richness_t")
 diversity_t_list <- lapply(X = perm_tests, FUN = "[[", "diversity_t")
-}
