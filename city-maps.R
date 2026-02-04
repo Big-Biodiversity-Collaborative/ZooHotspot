@@ -102,7 +102,7 @@ for (zoo_i in 1:nrow(city_zoos)) {
     geom_point(data = zoo_df,
                mapping = aes(x = lon, y = lat),
                shape = 24, 
-               fill = "#f7a3a1", # #FFFFFF
+               fill = "#add8e6", # #FFFFFF
                color = "#000000",
                size = 3,
                stroke = 0.6)
