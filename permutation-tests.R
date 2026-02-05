@@ -294,7 +294,7 @@ sample_values <- sample_values %>%
                              replacement = "\nReid Park",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
-                             replacement = "\nPheonix",
+                             replacement = "\nPhoenix",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Diego",
                           replacement = "\nSan Diego",
@@ -338,13 +338,13 @@ zoo_values <- zoo_values  %>%
                           replacement = "\nReid Park",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
-                          replacement = "\nPheonix",
+                          replacement = "\nPhoenix",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Diego",
                         replacement = "\nSan Diego",
                         x = zoo_print)) %>%
-  mutate(zoo_print = gsub(pattern = "LA",
-                        replacement = "\nLA",
+  mutate(zoo_print = gsub(pattern = "Los Angeles",
+                        replacement = "\nLos Angeles",
                         x = zoo_print))
   
 
