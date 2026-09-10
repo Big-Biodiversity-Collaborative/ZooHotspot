@@ -21,93 +21,110 @@ cities <- unique(zoos$city)
 city_plots <- list()
 
 for (city_i in 1:length(cities)) {
-  # city_i <- 1
+# city_i <- 6
   
   # Need city and state abbreviation.
   city_name <- cities[city_i]
-state_abbr <- zoos$state[zoos$city == city_name][1]  
-
-# Make a character string we can use with OpenStreetMap data with city and state abbreviation
-city_state <- paste0(city_name, ", ", state_abbr)
-message(paste0("Creating plot for ", city_state))
-city_poly <- osmdata::getbb(place_name = city_state,
-                            format_out = "polygon")
-# Most queries return a list, and we just want first matrix element when a single polygon is returned, it is already a matrix
-
-if (class(city_poly[1]) == "list") {
-  city_poly <- city_poly[[1]]
-}
-
-# Now get GBIF observations for the city
-city_fileslug <- tolower(x = gsub(pattern = ", ",
-                                  replacement = "_",
-                                  x = city_state))
-city_fileslug <- gsub(pattern = " ",
-                      replacement = "_",
-                      x = city_fileslug)
-city_obs <- read.csv(file = paste0("Data/GBIF/",
-                                   city_fileslug, "-obs.csv"))
-#add obs from gardens
-city_zoos <- zoos[zoos$city == city_name, ]
-for (zoo_i in 1:nrow(city_zoos)) {
-  zoo_name <- tolower(x = gsub(pattern = " ",
-                               replacement = "_",
-                               x = city_zoos$name[zoo_i]))
-  zoos_obs <- read.csv(file = paste0("Data/GBIF/",
-                                     zoo_name, "-obs.csv"))
+  state_abbr <- zoos$state[zoos$city == city_name][1]  
+  
+  # Make a character string we can use with OpenStreetMap data with city and state abbreviation
+  city_state <- paste0(city_name, ", ", state_abbr)
+  message(paste0("Creating plot for ", city_state))
+  city_poly <- osmdata::getbb(place_name = city_state,
+                              format_out = "polygon", 
+                              featuretype = "city")
+  # Most queries return a list, and we just want first matrix element when a 
+  # single polygon is returned, it is already a matrix
+  # variation in lists among all cities
+  if (city_i %in% c(1,5)){
+    city_poly <- city_poly[[1]][[1]]
+  }
+  if (city_i == 2){
+    city_poly <- city_poly[[1]][[1]][[2]]
+  } 
+  if (city_i %in% c(3,4,6)){
+    city_poly <- city_poly[[1]][[1]][[1]]
+  } 
+  # while(class(city_poly[1]) == "list") {
+  #   city_poly <- city_poly[[1]]
+  # }
+  # if (class(city_poly[1]) == "list") {
+  #   city_poly <- city_poly[[1]]
+  #   if (class(city_poly[1]) == "list") {
+  #     city_poly <- city_poly[[1]]
+  #   }
+  # }
+  
+  # Now get GBIF observations for the city
+  city_fileslug <- tolower(x = gsub(pattern = ", ",
+                                    replacement = "_",
+                                    x = city_state))
+  city_fileslug <- gsub(pattern = " ",
+                        replacement = "_",
+                        x = city_fileslug)
+  city_obs <- read.csv(file = paste0("Data/GBIF/",
+                                     city_fileslug, "-obs.csv"))
+  #add obs from gardens
+  city_zoos <- zoos[zoos$city == city_name, ]
+  for (zoo_i in 1:nrow(city_zoos)) {
+    zoo_name <- tolower(x = gsub(pattern = " ",
+                                 replacement = "_",
+                                 x = city_zoos$name[zoo_i]))
+    zoos_obs <- read.csv(file = paste0("Data/GBIF/",
+                                       zoo_name, "-obs.csv"))
+    city_obs <- city_obs %>%
+      dplyr::bind_rows(zoos_obs)
+  }
+  
+  #Drop duplicates
   city_obs <- city_obs %>%
-    dplyr::bind_rows(zoos_obs)
-}
-
-#Drop duplicates
-city_obs <- city_obs %>%
-  distinct()
-
-#Use ggplot polygons
-city_df <- data.frame(lon = city_poly[, 1],
-                      lat = city_poly[, 2])
-
-# Get dimensions of zoos, set plot boundaries
-lon_min <- min(c(city_poly[, 1], city_zoos$lon_min))
-lon_max <- max(c(city_poly[, 1], city_zoos$lon_max))
-lat_min <- min(c(city_poly[, 2], city_zoos$lat_min))
-lat_max <- max(c(city_poly[, 2], city_zoos$lat_max))
-
-city_plot <- ggplot(data = city_df, mapping = aes(x = lon, y = lat)) +
-  geom_polygon(fill = "white", color = "black") +
-  xlim(c(lon_min, lon_max)) + 
-  ylim(c(lat_min, lat_max)) + 
-  labs(title = city_state) + 
-  theme_void() +
-  theme(plot.title = element_text(hjust = 0.5, vjust = 1),
-        title = element_text(size = 6),
-        text = element_text(family = "ArialMT"))
-
-# Add observations to plot
-city_plot <- city_plot +
-  geom_point(data = city_obs, mapping = aes(x = decimalLongitude,
-                                            y = decimalLatitude),
-             shape = 3,
-             size = 0.8,
-             color = "#3da45c")
-
-# Add a triangle for each zoo
-for (zoo_i in 1:nrow(city_zoos)) {
-  lon <- (city_zoos$lon_min[zoo_i] + city_zoos$lon_max[zoo_i])/2
-  lat <- (city_zoos$lat_min[zoo_i] + city_zoos$lat_max[zoo_i])/2
-  zoo_df <- data.frame(lon = lon,
-                          lat = lat,
-                          zoo = city_zoos$name[zoo_i])
+    distinct()
+  
+  #Use ggplot polygons
+  city_df <- data.frame(lon = city_poly[, 1],
+                        lat = city_poly[, 2])
+  
+  # Get dimensions of zoos, set plot boundaries
+  lon_min <- min(c(city_poly[, 1], city_zoos$lon_min))
+  lon_max <- max(c(city_poly[, 1], city_zoos$lon_max))
+  lat_min <- min(c(city_poly[, 2], city_zoos$lat_min))
+  lat_max <- max(c(city_poly[, 2], city_zoos$lat_max))
+  
+  city_plot <- ggplot(data = city_df, mapping = aes(x = lon, y = lat)) +
+    geom_polygon(fill = "white", color = "black") +
+    xlim(c(lon_min, lon_max)) + 
+    ylim(c(lat_min, lat_max)) + 
+    labs(title = city_state) + 
+    theme_void() +
+    theme(plot.title = element_text(hjust = 0.5, vjust = 1),
+          title = element_text(size = 6),
+          text = element_text(family = "ArialMT"))
+  
+  # Add observations to plot
   city_plot <- city_plot +
-    geom_point(data = zoo_df,
-               mapping = aes(x = lon, y = lat),
-               shape = 24, 
-               fill = "#f7a3a1", # #FFFFFF
-               color = "#000000",
-               size = 3,
-               stroke = 0.6)
-}
-city_plots[[city_name]] <- city_plot
+    geom_point(data = city_obs, mapping = aes(x = decimalLongitude,
+                                              y = decimalLatitude),
+               shape = 3,
+               size = 0.8,
+               color = "#3da45c")
+  
+  # Add a triangle for each zoo
+  for (zoo_i in 1:nrow(city_zoos)) {
+    lon <- (city_zoos$lon_min[zoo_i] + city_zoos$lon_max[zoo_i])/2
+    lat <- (city_zoos$lat_min[zoo_i] + city_zoos$lat_max[zoo_i])/2
+    zoo_df <- data.frame(lon = lon,
+                         lat = lat,
+                         zoo = city_zoos$name[zoo_i])
+    city_plot <- city_plot +
+      geom_point(data = zoo_df,
+                 mapping = aes(x = lon, y = lat),
+                 shape = 24, 
+                 fill = "#f7a3a1", # #FFFFFF
+                 color = "#000000",
+                 size = 3,
+                 stroke = 0.6)
+  }
+  city_plots[[city_name]] <- city_plot
 }
 
 multi_city <- ggpubr::ggarrange(city_plots[[1]], 
