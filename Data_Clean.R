@@ -7,7 +7,7 @@
 library(dplyr)
 
 # Load in Zoo data
-zoos <- read.csv(file = "data/zoos.csv")
+zoos <- read.csv(file = "Data/Zoos.csv")
 
 obs_counts <- data.frame(zoos = zoos$name,
                         zoo_count = NA,
@@ -105,7 +105,7 @@ observation_counts <- obs_counts %>%
   arrange(state, city)
 # observation_counts
 write.csv(x = observation_counts,
-          file = "output/observation-counts.csv",
+          file = "Output/observation-counts.csv",
           row.names = FALSE)
 
 # Output table for species counts
@@ -115,7 +115,7 @@ species_counts <- species_obs %>%
   ungroup()
 # nrow(species_counts)
 write.csv(x = species_counts,
-          file = "output/species-counts.csv",
+          file = "Output/species-counts.csv",
           row.names = FALSE)
 
 # How many from iNat and eButterfly?

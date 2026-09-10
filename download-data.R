@@ -21,7 +21,7 @@ source(file = "Functions/query_gbif.R")
 #TODO: keep city-stats updated based on this
 
 # Load zoo data
-zoos <- read.csv(file = "data/zoos.csv")
+zoos <- read.csv(file = "Data/Zoos.csv")
 
 # Indicate whether or not to overwrite data files that already exist
 overwrite <- FALSE
@@ -37,20 +37,20 @@ taxon_keys <- c("Hesperiidae" = 6953,
 for (zoo_i in 1:nrow(zoos)) {
   # Make a nice filename for the data file
   zoo_name <- tolower(x = gsub(pattern = " ", 
-                                  replacement = "_",
-                                  x = zoos$name[zoo_i]))
-  zoo_file <- paste0("data/gbif/", zoo_name, "-obs.csv")
+                               replacement = "_",
+                               x = zoos$name[zoo_i]))
+  zoo_file <- paste0("Data/GBIF/", zoo_name, "-obs.csv")
   if (overwrite | !file.exists(zoo_file)) {
     message("***  Downloading data for ", zoos$name[zoo_i])
     # Count number of observations in zoo rectangle, as pagination might be 
     # necessary; actually performs one search per taxonKey value (in this case, 
     # one search per family and returns list with one element for each family)
     zoos_obs <- query_gbif(taxon_keys = taxon_keys,
-                             lon_limits = c(zoos$lon_min[zoo_i], 
-                                            zoos$lon_max[zoo_i]),
-                             lat_limits = c(zoos$lat_min[zoo_i], 
-                                            zoos$lat_max[zoo_i]),
-                             verbose = TRUE)
+                           lon_limits = c(zoos$lon_min[zoo_i], 
+                                          zoos$lon_max[zoo_i]),
+                           lat_limits = c(zoos$lat_min[zoo_i], 
+                                          zoos$lat_max[zoo_i]),
+                           verbose = TRUE)
     
     write.csv(x = zoos_obs,
               file = zoo_file,
@@ -69,52 +69,67 @@ for(city_state in city_state_string) {
   city_name <- tolower(x = gsub(pattern = ", ",
                                 replacement = "_",
                                 x = city_state))
-
-
-city_name <- gsub(pattern = " ",
-                  replacement = "_",
-                  x = city_name)
-city_file <- paste0("data/gbif/", city_name, "-obs.csv")
-if (overwrite | !file.exists(city_file)) {
-  message("***  Downloading data for ", city_state)
-  city_poly <- osmdata::getbb(place_name = city_state, format_out = "polygon")
-  # Most queries return a list, and we just want the first matrix element; when 
-  # a single polygon is returned, it is already a matrix
-  if (class(city_poly)[1] == "list") {
-    city_poly <- city_poly[[1]]
+  
+  
+  city_name <- gsub(pattern = " ",
+                    replacement = "_",
+                    x = city_name)
+  city_file <- paste0("Data/GBIF/", city_name, "-obs.csv")
+  if (overwrite | !file.exists(city_file)) {
+    message("***  Downloading data for ", city_state)
+    city_poly <- osmdata::getbb(place_name = city_state,
+                                format_out = "polygon", 
+                                featuretype = "city")
+    # Most queries return a list, and we just want first matrix element when a 
+    # single polygon is returned, it is already a matrix
+    # variation in lists among all cities
+    if (city_i %in% c(1,5)){
+      city_poly <- city_poly[[1]][[1]]
+    }
+    if (city_i == 2){
+      city_poly <- city_poly[[1]][[1]][[2]]
+    } 
+    if (city_i %in% c(3,4,6)){
+      city_poly <- city_poly[[1]][[1]][[1]]
+    } 
+    # city_poly <- osmdata::getbb(place_name = city_state, format_out = "polygon")
+    # # Most queries return a list, and we just want the first matrix element; when 
+    # # a single polygon is returned, it is already a matrix
+    # if (class(city_poly)[1] == "list") {
+    #   city_poly <- city_poly[[1]]
+    # }
+    # 
+    # First find the maximum containing rectangle coordinates and use those for 
+    # the GBIF query
+    min_lon <- min(city_poly[, 1])
+    max_lon <- max(city_poly[, 1])
+    min_lat <- min(city_poly[, 2])
+    max_lat <- max(city_poly[, 2])
+    
+    city_obs <- query_gbif(taxon_keys = taxon_keys,
+                           lon_limits = c(min_lon, max_lon),
+                           lat_limits = c(min_lat, max_lat),
+                           verbose = TRUE)
+    
+    # Convert the polygon to a simple feature for ease of filtering points
+    city_sf <- sf::st_polygon(x = list(city_poly), dim = "XY")
+    
+    # Now make the city_obs into a simple feature  
+    wgs84 <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+    city_obs_sf <- sf::st_as_sf(x = city_obs,
+                                coords = c("decimalLongitude", "decimalLatitude"),
+                                crs = wgs84)
+    
+    # and use it with sf::st_within; below returns logical vector indicating 
+    # whether point is within the polygon; use that vector to select rows from 
+    # city_obs that are within the city polygon
+    points_within <- sf::st_within(x = city_obs_sf, y = city_sf) %>% lengths > 0
+    city_obs <- city_obs[points_within, ]
+    write.csv(x = city_obs,
+              file = city_file,
+              row.names = FALSE)
   }
-  
-  # First find the maximum containing rectangle coordinates and use those for 
-  # the GBIF query
-  min_lon <- min(city_poly[, 1])
-  max_lon <- max(city_poly[, 1])
-  min_lat <- min(city_poly[, 2])
-  max_lat <- max(city_poly[, 2])
-  
-  city_obs <- query_gbif(taxon_keys = taxon_keys,
-                         lon_limits = c(min_lon, max_lon),
-                         lat_limits = c(min_lat, max_lat),
-                         verbose = TRUE)
-  
-  # Convert the polygon to a simple feature for ease of filtering points
-  city_sf <- sf::st_polygon(x = list(city_poly), dim = "XY")
-  
-  # Now make the city_obs into a simple feature  
-  wgs84 <- "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-  city_obs_sf <- sf::st_as_sf(x = city_obs,
-                              coords = c("decimalLongitude", "decimalLatitude"),
-                              crs = wgs84)
-  
-  # and use it with sf::st_within; below returns logical vector indicating 
-  # whether point is within the polygon; use that vector to select rows from 
-  # city_obs that are within the city polygon
-  points_within <- sf::st_within(x = city_obs_sf, y = city_sf) %>% lengths > 0
-  city_obs <- city_obs[points_within, ]
-  write.csv(x = city_obs,
-            file = city_file,
-            row.names = FALSE)
+  else {
+    message("Skipping download for ", city_state, ", already on disk.")
   }
-else {
-  message("Skipping download for ", city_state, ", already on disk.")
-}
 }

@@ -20,7 +20,7 @@ min_year <-  2000
 drop_single <- FALSE
 
 #file to save permutation results
-perm_test_file <-  "output/perm-test-results.rds"
+perm_test_file <-  "Output/perm-test-results.rds"
 
 #force permutation tests even if results exist on disk?
 force_perms <- TRUE
@@ -288,19 +288,19 @@ sample_values <- sample_values %>%
                              replacement = "ABQ",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Antonio", # To fit on plot
-                             replacement = "\nSan Antonio",
+                             replacement = "San Antonio",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Reid Park",
-                             replacement = "\nReid Park",
+                             replacement = "Reid Park",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
-                             replacement = "\nPhoenix",
+                             replacement = "Phoenix",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Diego",
-                          replacement = "\nSan Diego",
+                          replacement = "San Diego",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Los Angeles",
-                        replacement = "\nLos Angeles",
+                        replacement = "Los Angeles",
                         x = zoo_print))
 
 
@@ -332,19 +332,19 @@ zoo_values <- zoo_values  %>%
                              replacement = "ABQ",
                              x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Antonio", # To fit on plot
-                          replacement = "\nSan Antonio",
+                          replacement = "San Antonio",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Reid Park",
-                          replacement = "\nReid Park",
+                          replacement = "Reid Park",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Phx",
-                          replacement = "\nPhoenix",
+                          replacement = "Phoenix",
                           x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "San Diego",
-                        replacement = "\nSan Diego",
+                        replacement = "San Diego",
                         x = zoo_print)) %>%
   mutate(zoo_print = gsub(pattern = "Los Angeles",
-                        replacement = "\nLos Angeles",
+                        replacement = "Los Angeles",
                         x = zoo_print))
   
 
@@ -354,7 +354,6 @@ richness_plot <- ggplot(data = sample_values, mapping = aes(x = zoo_print,
   geom_violin() +
   # geom_boxplot() +
   ylab("Species Richness") +
-  xlab(element_blank()) +
   scale_fill_discrete(type = rainbow(length(unique(sample_values$zoo_print)))) +
   geom_point(data = zoo_values, 
              mapping = aes(x = zoo_print, y = richness),
@@ -368,14 +367,15 @@ richness_plot <- ggplot(data = sample_values, mapping = aes(x = zoo_print,
   theme(legend.position = "none",
         axis.text = element_text(size = 6), # Font sizes for print
         axis.title.y = element_text(size = 8),
+        axis.title.x = element_blank(),
         text = element_text(family = "ArialMT"))
 richness_plot
-ggsave(filename = "output/Richness-plot.pdf",
+ggsave(filename = "Output/Richness-plot.pdf",
        plot = richness_plot,
        width = 5,
        height = 3,
        units = "in")
-ggsave(filename = "output/Richness-plot.png",
+ggsave(filename = "Output/Richness-plot.png",
        plot = richness_plot,
        width = 5,
        height = 3,
@@ -388,7 +388,6 @@ diversity_plot <- ggplot(data = sample_values, mapping = aes(x = zoo_print,
   geom_violin() + # Ahem
   # geom_boxplot() +
   ylab("Shannon's Index") +
-  xlab(element_blank()) +
   scale_fill_discrete(type = rainbow(length(unique(sample_values$zoo_print)))) +
   geom_point(data = zoo_values, 
              mapping = aes(x = zoo_print, y = diversity),
@@ -402,14 +401,15 @@ diversity_plot <- ggplot(data = sample_values, mapping = aes(x = zoo_print,
   theme(legend.position = "none",
         axis.text = element_text(size = 6), # Font sizes for print
         axis.title.y = element_text(size = 8),
+        axis.title.x = element_blank(),
         text = element_text(family = "ArialMT"))
 diversity_plot
-ggsave(filename = "output/Diversity-plot.pdf",
+ggsave(filename = "Output/Diversity-plot.pdf",
        plot = diversity_plot,
        width = 5,
        height = 3,
        units = "in")
-ggsave(filename = "output/Diversity-plot.png",
+ggsave(filename = "Output/Diversity-plot.png",
        plot = diversity_plot,
        width = 5,
        height = 3,
@@ -427,7 +427,7 @@ zoo_values %>%
   mutate(zoo = gsub(pattern = "Abq",
                        replacement = "ABQ",
                        x = zoo)) %>%
-  write.csv(file = "output/perm-tests.csv",
+  write.csv(file = "Output/perm-tests.csv",
             row.names = FALSE)
 
 # Pull out values for those permutation t-tests

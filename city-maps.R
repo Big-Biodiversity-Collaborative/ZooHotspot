@@ -45,16 +45,7 @@ for (city_i in 1:length(cities)) {
   if (city_i %in% c(3,4,6)){
     city_poly <- city_poly[[1]][[1]][[1]]
   } 
-  # while(class(city_poly[1]) == "list") {
-  #   city_poly <- city_poly[[1]]
-  # }
-  # if (class(city_poly[1]) == "list") {
-  #   city_poly <- city_poly[[1]]
-  #   if (class(city_poly[1]) == "list") {
-  #     city_poly <- city_poly[[1]]
-  #   }
-  # }
-  
+
   # Now get GBIF observations for the city
   city_fileslug <- tolower(x = gsub(pattern = ", ",
                                     replacement = "_",
@@ -134,12 +125,12 @@ multi_city <- ggpubr::ggarrange(city_plots[[1]],
                                 city_plots[[6]],
                                 ncol = 3, nrow = 2)
 multi_city
-ggsave(filename = "output/City-plot.pdf",
+ggsave(filename = "Output/City-plot.pdf",
        plot = multi_city,
        width = 5,
        height = 3.33,
        units = "in")
-ggsave(filename = "output/City-plot.png",
+ggsave(filename = "Output/City-plot.png",
        plot = multi_city,
        width = 5,
        height = 3.33,

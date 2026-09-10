@@ -44,10 +44,22 @@ for (zoo_i in 1:nrow(zoos)) {
     city_string <- paste0(city_name, ", ", state_name)
     message(paste0("Running query for ", city_string, " on OSM."))
     city_poly <- osmdata::getbb(place_name = city_string,
-                                format_out = "polygon")
-    if (class(city_poly)[1] == "list") {
-      city_poly <- city_poly[[1]]
+                                format_out = "polygon", 
+                                featuretype = "city")
+    # Most queries return a list, and we just want first matrix element when a 
+    # single polygon is returned, it is already a matrix
+    # variation in lists among all cities
+    if (city_name %in% c("Tucson", "Los Angeles")){
+      city_poly <- city_poly[[1]][[1]]
     }
+    if (city_name == "Phoenix"){
+      city_poly <- city_poly[[1]][[1]][[2]]
+    } 
+    if (city_name %in% c("San Diego", "Albuquerque", "San Antonio")){
+      city_poly <- city_poly[[1]][[1]][[1]]
+    } 
+    
+    
     city_st_poly <- sf::st_polygon(x = list(city_poly), dim = "XY")
     city_sf <- sf::st_sfc(city_st_poly, crs = wgs84)
     city_area <- units::set_units(sf::st_area(city_sf), 

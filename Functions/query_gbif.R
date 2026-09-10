@@ -102,6 +102,7 @@ query_gbif <- function(taxon_keys, lon_limits, lat_limits, verbose = FALSE,
       dplyr::select(dplyr::intersect(cols, colnames(all_obs)))
   }
   return(all_obs)
+}
 
 #' Download records from GBIF for a set of coordinates and list of taxa
 #' 

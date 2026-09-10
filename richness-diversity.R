@@ -7,7 +7,7 @@
 require(dplyr)   # data wrangling
 
 # Load zoo data
-zoos <- read.csv(file = "data/zoos.csv")
+zoos <- read.csv(file = "Data/Zoos.csv")
 min_obs <- 35
 
 # We only want observations that occurred in or after 2000 
@@ -23,7 +23,7 @@ for (zoo_i in 1:nrow(zoos)) {
   zoo_name <- tolower(x = gsub(pattern = " ", 
                                   replacement = "_",
                                   x = zoos$name[zoo_i]))
-  zoo_file <- paste0("data/gbif/", zoo_name, "-obs.csv")
+  zoo_file <- paste0("Data/GBIF/", zoo_name, "-obs.csv")
   zoo_obs <- read.csv(file = zoo_file)
   # Keep only those records with species name and year >= min_year
   zoo_obs <- zoo_obs %>%
@@ -60,7 +60,7 @@ for (zoo_i in 1:nrow(zoos)) {
     city_name <- gsub(pattern = " ",
                       replacement = "_",
                       x = city_name)
-    city_file <- paste0("data/gbif/", city_name, "-obs.csv")
+    city_file <- paste0("Data/GBIF/", city_name, "-obs.csv")
     
     # Read in data
     city_obs <- read.csv(file = city_file)
@@ -94,5 +94,5 @@ zoos %>%
          city_richness, city_diversity) %>%
   mutate(perc_richness = zoo_richness/city_richness,
          perc_diversity = zoo_diversity/city_diversity) %>%
-  write.csv(file = "output/richness-diversity.csv",
+  write.csv(file = "Output/richness-diversity.csv",
             row.names = FALSE)
