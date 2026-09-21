@@ -23,7 +23,7 @@ drop_single <- FALSE
 perm_test_file <-  "Output/perm-test-results.rds"
 
 #force permutation tests even if results exist on disk?
-force_perms <- TRUE
+force_perms <- FALSE
 
 if (force_perms | !file.exists(perm_test_file))  {
   #parameters for perm tests
@@ -433,3 +433,42 @@ zoo_values %>%
 # Pull out values for those permutation t-tests
 richness_t_list <- lapply(X = perm_tests, FUN = "[[", "richness_t")
 diversity_t_list <- lapply(X = perm_tests, FUN = "[[", "diversity_t")
+
+# Create Table 3
+# Zoo | Zoo Rich | City Rich | Perc Rich | Zoo H | City H | Perc H 
+table_3 <- zoo_values %>%
+  rename(Zoo = zoo_print) %>%
+  rename(`Zoo Richness` = richness) %>%
+  mutate(richness_quantile = round(x = richness_quantile * 100,
+                                   digits = 2)) %>%
+  rename(`Richness Percentile` = richness_quantile) %>%
+  mutate(diversity = round(x = diversity, digits = 2)) %>%
+  rename(`Zoo Diversity` = diversity) %>%
+  mutate(diversity_quantile = round(x = diversity_quantile * 100,
+                                   digits = 2)) %>%
+  rename(`Diversity Percentile` = diversity_quantile)
+
+# Need to add city values for Richness & Diversity, from 
+# Output/richness-diversity.csv
+if (file.exists("Output/richness-diversity.csv")) {
+  rd <- read.csv(file = "Output/richness-diversity.csv")
+  rd <- na.omit(rd)
+  rd <- rd %>%
+    select(name, city_richness, city_diversity)
+  table_3 <- table_3 %>%
+    left_join(rd, by = join_by(Zoo == name)) %>%
+    rename(`City Richness` = city_richness) %>%
+    mutate(city_diversity = round(x = city_diversity, digits = 2)) %>%
+    rename(`City Diversity` = city_diversity) %>%
+    select(Zoo, `Zoo Richness`, `City Richness`, `Richness Percentile`, 
+           `Zoo Diversity`, `City Diversity`, `Diversity Percentile`)
+} else {
+  table_3 <- table_3 %>%
+  select(Zoo, `Zoo Richness`, `Richness Percentile`, `Zoo Diversity`, 
+         `Diversity Percentile`)
+  message("Note, city data not found; Table 3 incomplete.")
+}
+
+write.csv(file = "Output/Table-3.csv",
+          x = table_3,
+          row.names = FALSE)
