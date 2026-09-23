@@ -34,18 +34,11 @@ for (city_i in 1:length(cities)) {
   city_poly <- osmdata::getbb(place_name = city_state,
                               format_out = "sf_polygon", 
                               featuretype = "city")
-  # Most queries return a list, and we just want first matrix element when a 
-  # single polygon is returned, it is already a matrix
-  # variation in lists among all cities
-  # if (city_i %in% c(1,5)){
-  #   city_poly <- city_poly[[1]][[1]]
-  # }
+  # San Diego (3) and Los Angeles (5) return two sf_polygons, so we need to 
+  # explicitly pull out the first element (second element is county polygon).
   if (city_i %in% c(3, 5)) {
     city_poly <- city_poly[1, ]
   }
-  # if (city_i %in% c(3,4,6)){
-  #   city_poly <- city_poly[[1]][[1]][[1]]
-  # } 
 
   # Now get GBIF observations for the city
   city_fileslug <- tolower(x = gsub(pattern = ", ",
@@ -119,12 +112,17 @@ for (city_i in 1:length(cities)) {
   }
   # Add a scale bar
   # Have to play around to get same scale bar (10km) for each map
-  # San Diego, LA, San Antonio width_hint = 0.25
+  # Tucson (1), Phoenix (2) width_hint = 0.3
+  # San Diego (3), LA (5), San Antonio (6) width_hint = 0.25
+  width_hint <- 0.25
+  if (city_i %in% c(1, 2)) {
+    width_hint <- 0.3
+  }
   city_plot <- city_plot +
     ggspatial::annotation_scale(height = unit(0.15, "cm"),
-                                text_cex = 0.3,
+                                text_cex = 0.0,
                                 bar_cols = "black",
-                                width_hint = 0.25)
+                                width_hint = width_hint)
   
   city_plots[[city_name]] <- city_plot
 }
