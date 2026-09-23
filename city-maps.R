@@ -9,6 +9,7 @@ require(osmdata)  # city boundaries
 require(ggplot2) #data viz
 require(ggpubr) #multi-panel plot
 require(extrafont) #to use Arial in figures
+require(ggspatial) # For map scale bar
 
 # Get a polygon for each city
 # Add star for zoo location and plus symbols for records from GBIF
@@ -21,7 +22,7 @@ cities <- unique(zoos$city)
 city_plots <- list()
 
 for (city_i in 1:length(cities)) {
-# city_i <- 6
+# city_i <- 5
   
   # Need city and state abbreviation.
   city_name <- cities[city_i]
@@ -31,20 +32,20 @@ for (city_i in 1:length(cities)) {
   city_state <- paste0(city_name, ", ", state_abbr)
   message(paste0("Creating plot for ", city_state))
   city_poly <- osmdata::getbb(place_name = city_state,
-                              format_out = "polygon", 
+                              format_out = "sf_polygon", 
                               featuretype = "city")
   # Most queries return a list, and we just want first matrix element when a 
   # single polygon is returned, it is already a matrix
   # variation in lists among all cities
-  if (city_i %in% c(1,5)){
-    city_poly <- city_poly[[1]][[1]]
+  # if (city_i %in% c(1,5)){
+  #   city_poly <- city_poly[[1]][[1]]
+  # }
+  if (city_i %in% c(3, 5)) {
+    city_poly <- city_poly[1, ]
   }
-  if (city_i == 2){
-    city_poly <- city_poly[[1]][[1]][[2]]
-  } 
-  if (city_i %in% c(3,4,6)){
-    city_poly <- city_poly[[1]][[1]][[1]]
-  } 
+  # if (city_i %in% c(3,4,6)){
+  #   city_poly <- city_poly[[1]][[1]][[1]]
+  # } 
 
   # Now get GBIF observations for the city
   city_fileslug <- tolower(x = gsub(pattern = ", ",
@@ -72,19 +73,20 @@ for (city_i in 1:length(cities)) {
     distinct()
   
   #Use ggplot polygons
-  city_df <- data.frame(lon = city_poly[, 1],
-                        lat = city_poly[, 2])
+  # city_df <- data.frame(lon = city_poly[, 1],
+  #                       lat = city_poly[, 2])
   
   # Get dimensions of zoos, set plot boundaries
-  lon_min <- min(c(city_poly[, 1], city_zoos$lon_min))
-  lon_max <- max(c(city_poly[, 1], city_zoos$lon_max))
-  lat_min <- min(c(city_poly[, 2], city_zoos$lat_min))
-  lat_max <- max(c(city_poly[, 2], city_zoos$lat_max))
+  city_extent <- sf::st_bbox(city_poly)
+  lon_min <- min(c(city_extent["xmin"], city_zoos$lon_min))
+  lon_max <- max(c(city_extent["xmax"], city_zoos$lon_max))
+  lat_min <- min(c(city_extent["ymin"], city_zoos$lat_min))
+  lat_max <- max(c(city_extent["ymax"], city_zoos$lat_max))
   
-  city_plot <- ggplot(data = city_df, mapping = aes(x = lon, y = lat)) +
-    geom_polygon(fill = "white", color = "black") +
-    xlim(c(lon_min, lon_max)) + 
-    ylim(c(lat_min, lat_max)) + 
+  city_plot <- ggplot(data = city_poly) +
+    geom_sf(fill = "white", color = "black") +
+    xlim(c(lon_min, lon_max)) +
+    ylim(c(lat_min, lat_max)) +
     labs(title = city_state) + 
     theme_void() +
     theme(plot.title = element_text(hjust = 0.5, vjust = 1),
@@ -115,6 +117,15 @@ for (city_i in 1:length(cities)) {
                  size = 3,
                  stroke = 0.6)
   }
+  # Add a scale bar
+  # Have to play around to get same scale bar (10km) for each map
+  # San Diego, LA, San Antonio width_hint = 0.25
+  city_plot <- city_plot +
+    ggspatial::annotation_scale(height = unit(0.15, "cm"),
+                                text_cex = 0.3,
+                                bar_cols = "black",
+                                width_hint = 0.25)
+  
   city_plots[[city_name]] <- city_plot
 }
 
